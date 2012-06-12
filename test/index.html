@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>tAMD Test Suite</title>
+    <link rel="stylesheet" href="../vendor/qunit/qunit/qunit.css">
+    <script src="../vendor/qunit/qunit/qunit.js"></script>
+    <script src="../vendor/jquery-1.7.2.min.js"></script>
+
+    <!-- code to test -->
+    <script src="../define.js" class="reinitialize"></script>
+    <script src="../hooks.js" class="reinitialize"></script>
+    <script src="../resolve.js" class="reinitialize"></script>
+    <script src="../loader.js" class="reinitialize"></script>
+    <script src="../debug.js" class="reinitialize"></script>
+
+    <!-- tests -->
+    <script src="helper.js"></script>
+    <script src="define-test.js"></script>
+    <script src="hooks-test.js"></script>
+    <script src="resolve-test.js"></script>
+    <script src="loader-test.js"></script>
+    <script src="debug-test.js"></script>
+</head>
+<body>
+    <div id="qunit"></div>
+    <div id="qunit-fixture">test markup</div>
+</body>
+</html>
