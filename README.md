@@ -54,11 +54,11 @@ take a module name argument.  For example:
     require(['jquery'], function($) {
         setInterval(function() {
             $('.blink').css('visibility', 'hidden');
-        }, 500); setTimeout(function() {
+        }, 500);
         setTimeout(function() {
             setInterval(function() {
                 $('.blink').css('visibility', 'visible');
-            }, 500); setTimeout(function() {
+            }, 500);
         }, 500);
     });
 
@@ -103,7 +103,7 @@ factory is invoked:
             revisedDeps = dependencies.map(function(dep) {
                 return dep === 'jquery' ? 'jquery-1.4' : dep;
             });
-            return [id, dependencies, factory];
+            return [id, revisedDependencies, factory];
         });
     });
 
@@ -160,7 +160,7 @@ a "require" hook to resolve relative module paths:
                 resolved = idParts;
             }
 
-            return resolved.join('/');
+            return [resolved.join('/'), contextId];
         });
     });
 
