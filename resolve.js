@@ -22,14 +22,14 @@
  * limitations under the License.
  */
 
-/*jshint laxcomma:true */
+/*jshint laxcomma:true sub:true */
 
 define('tAMD/resolve', ['tAMD/hooks', 'require'], function(hooks, require) {
-    hooks.before(function(id, dependencies, factory) {
+    hooks['on']('define', function(id, dependencies, factory) {
         return [id, map(function(d) { return resolve(d, id); }, dependencies), factory];
     });
 
-    hooks.require(function(id, contextId) {
+    hooks['on']('require', function(id, contextId) {
         return [resolve(id, contextId), contextId];
     });
 

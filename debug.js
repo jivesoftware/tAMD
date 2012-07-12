@@ -23,11 +23,12 @@
  */
 
 /*globals define console */
+/*jshint sub:true */
 
 require(['tAMD/hooks', 'require'], function(hooks, requireSync) {
     var alreadyChecked = {};
 
-    hooks.before(function(id, dependencies, factory) {
+    hooks['on']('define', function(id, dependencies, factory) {
         warnIfValueMissing(id, factory);
         errorIfRelative(id);
         for (var i = 0; i < dependencies.length; i++) {
@@ -35,7 +36,7 @@ require(['tAMD/hooks', 'require'], function(hooks, requireSync) {
         }
     });
 
-    hooks.after(function(id, moduleValue) {
+    hooks['on']('publish', function(id, moduleValue) {
         warnIfDuplicate(id);
     });
 

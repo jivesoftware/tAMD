@@ -46,7 +46,7 @@ define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
         }
     }
 
-    hooks['before'](function(id, dependencies, factory) {
+    hooks['on']('define', function(id, dependencies, factory) {
         for (var i = 0; i < dependencies.length; i++) {
             maybeLoad(dependencies[i]);
         }

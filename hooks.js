@@ -24,27 +24,23 @@
 /*jshint laxcomma:true */
 
 define('tAMD/hooks', ['tAMD'], function(tAMD, undef) {
-    var before = {}
-      , after = {}
-      , onRequire = {}
-      , beforeAll = []
-      , afterAll = []
-      , onRequireAll = [];
+    var queues = {};
 
     tAMD._pre = function(/* id, dependencies, factory */) {
-        return runCallbacks(beforeAll, before, arguments);
+        return runCallbacks('define', arguments);
     };
 
     tAMD._post = function(/* id, moduleValue */) {
-        return runCallbacks(afterAll, after, arguments);
+        return runCallbacks('publish', arguments);
     };
 
     tAMD._req = function(/* id, contextId */) {
-        return runCallbacks(onRequireAll, onRequire, arguments);
+        return runCallbacks('require', arguments);
     };
 
-    function runCallbacks(all, mappings, args) {
-        var callbacks = all.concat(mappings[args[0]] || []), ret, val;
+    function runCallbacks(eventType, args) {
+        var callbacks = getQueue(eventType, '**').concat(getQueue(eventType, args[0]))
+          , ret, val;
         for (var i = 0; i < callbacks.length; i++) {
             if (ret !== false) {
                 val = callbacks[i].apply(undef, ret || args);
@@ -54,27 +50,36 @@ define('tAMD/hooks', ['tAMD'], function(tAMD, undef) {
         return ret;
     }
 
-    function register(all, mappings, id, callback) {
-        var callbacks;
+    function on(eventType, id, callback) {
+        if (!callback) {
+            callback = id;
+            id = '**';  // hook runs on every module
+        }
+        getQueue(eventType, id).push(callback);
+    }
+
+    function off(eventType, id, callback) {
         if (typeof id === 'function') {
-            all.push(id);  // hook runs on every module
-        } else {
-            callbacks = mappings[id] = mappings[id] || [];
-            callbacks.push(callback);
+            callback = id;
+            id = '**';  // hook runs on every module
+        }
+        var queue = getQueue(eventType, id || '**');
+        for (var i = 0; i < queue.length; i++) {
+            if (queue[i] === callback || !callback) {
+                queue.splice(i, 1);  // Removes the matching callback from the array.
+                i -= 1; // Compensate for array length changing within the loop.
+            }
         }
     }
 
+    function getQueue(eventType, id) {
+        var typeSpecific = queues[eventType] = queues[eventType] || {}
+          , queue = typeSpecific[id] = typeSpecific[id] || [];
+        return queue;
+    }
+
     return {
-        'before': function(id, callback) {
-            register(beforeAll, before, id, callback);
-        },
-
-        'after': function(id, callback) {
-            register(afterAll, after, id, callback);
-        },
-
-        'require': function(id, callback) {
-            register(onRequireAll, onRequire, id, callback);
-        }
+        'on': on,
+        'off': off
     };
 });

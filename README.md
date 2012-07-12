@@ -83,23 +83,23 @@ function.
 
 This addon provides friendly integration points into tAMD.  You can
 register callbacks to be invoked when a module is declared or before
-a module is made available to other modules.  Your callbacks can modify
-properties of a module before it is created, cancel creation of
-a module, or perform some side-effect like logging or dependency
-loading.
+a module is published and made available to other modules.  Your
+callbacks can modify properties of a module before it is created, cancel
+creation of a module, or perform some side-effect like logging or
+dependency loading.
 
-There are three types of hooks available:
+There are three lifecycle events that you can register callbacks for:
 
-* before : `hooks.before([moduleName], function(id, dependencies, factory){})`
-* after : `hooks.after([moduleName], function(id, moduleValue){})`
-* require : `hooks.require([moduleName], function(id, contextId){})`
+* define : `hooks.on('define', [moduleName], function(id, dependencies, factory){})`
+* publish : `hooks.on('publish', [moduleName], function(id, moduleValue){})`
+* require : `hooks.on('require', [moduleName], function(id, contextId){})`
 
-Use the "before" hook to run a callback as soon as a module is declared
+Use the "define" hook to run a callback as soon as a module is declared
 via a call to `define()` before its dependencies are resolved or its
 factory is invoked:
 
     require(['tAMD/hooks'], function(hooks) {
-        hooks.before('someOldModule', function(id, dependencies, factory) { 
+        hooks.on('define', 'someOldModule', function(id, dependencies, factory) {
             revisedDeps = dependencies.map(function(dep) {
                 return dep === 'jquery' ? 'jquery-1.4' : dep;
             });
@@ -112,42 +112,45 @@ The above example intercepts the definition of a module called
 jQuery version.  By modifying the array that is returned you could also
 change the name of the module or replace or wrap its factory.
 
-You can return `false` from a "before" hook to cancel the module.  In
+You can return `false` from a "define" hook to cancel the module.  In
 that case the module's dependencies are not resolved and its factory is
 never invoked.
 
-If you do not return a value from a "before" hook then the module is
+If you do not return a value from a "define" hook then the module is
 created normally.  You can use this feature for whatever kind of
 side-effects you might want.  For example, `loader.js` initiates lazy
-dependency loading via a "before" hook.
+dependency loading via a "define" hook.
 
-The "after" hook is similar; except that its callback is invoked after
-the module's factory is executed.  In an "after" hook you can change the
-name of a module, tweak or replace the value that the module exports, or
-return `false` to prevent the module from becoming available as
-a dependency to other modules.  For example:
+The "publish" hook is similar; except that its callbacks are invoked
+after the module's factory is executed.  In a "publish" hook you can
+change the name of a module, tweak or replace the value that the module
+exports, or return `false` to prevent the module from becoming available
+as a dependency to other modules.  For example:
 
     require(['tAMD/hooks'], function(hooks) {
-        hooks.after('jquery', function(id, moduleValue) {
+        hooks.on('publish', 'jquery', function(id, moduleValue) {
             var version = moduleValue.fn.jquery;  // moduleValue === jQuery in this case
             return ['jquery-'+ version, moduleValue];
         });
     });
+
+This example changes the name of any jQuery modules to include a version
+number as part of the module name.
 
 The "require" hook is invoked during dependency lookups.  Whenever
 `define()` or either the sync or async versions of `require()` are
 invoked with dependencies, each dependency name is run through any
 "require" hooks before the dependency is actually looked up.
 
-Two arguments are given to "require" callbacks: the name of the
-requested module that was requested and the name of the module that did
-the requesting.  If a dependency is referenced by async `require()` or
-by a `define()` call with no module name then the second argument will
-be `undefined`.  Here is a quick and dirty example of how to use
-a "require" hook to resolve relative module paths:
+Two arguments are given to "require" callbacks: the name of the module
+that was requested and the name of the module that did the requesting.
+If a dependency is referenced by async `require()` or by a `define()`
+call with no module name then the second argument will be `undefined`.
+Here is a quick and dirty example of how to use a "require" hook to
+resolve relative module paths:
 
     require(['tAMD/hooks'], function(hooks) {
-        hooks.require(function(id, contextId) {
+        hooks.on('require', function(id, contextId) {
             var contextParts = contextId ? contextId.split('/') : [];
             var idParts = id.split('/');
             var dir, module, resolved;
@@ -174,12 +177,12 @@ like this:
 In which case the arguments given to the "require" hook callback would
 be `"./hooks"` and `"tAMD/myAddon"`.
 
-There is a better implementation of relative path resolution in
-`resolve.js`.
+This is just an example.  There is a better implementation of relative
+path resolution in `resolve.js`.
 
 In the example above there was no module name argument given to the
 "require" hook.  The hook can be given a module name, which will cause
-it to act only on that module, as with "before" and "after".  But with
+it to act only on that module, as with "define" and "publish".  But with
 all three hook types if you exclude the module name argument then the
 hook will act on *all* modules.
 
@@ -194,8 +197,8 @@ When this addon is included dependencies that are given as relative
 paths are automatically resolved.  Relative paths will probably not work
 as you expect unless you include this addon or one like it.
 
-This addon also exports a module called `tAMD/resolve`, which is
-function that takes a module id, which may or may not be a relative
+This addon includes a module called `tAMD/resolve`, which exports
+a function that takes a module id, which may or may not be a relative
 path, and a context and returns the resolved module name.
 
 ### `loader.js` - `tAMD/loader`
@@ -217,6 +220,9 @@ The first argument to `map()` is a list of module ids, and the second is
 a list of URLs.  If any of the given module ids is referenced as
 a dependency then the given URLs will be loaded in order.
 
+Note that the synchronous version of `require()` does not trigger lazy
+loading.  loader.js only works on asynchronous dependencies.
+
 If you are using `resolve.js` make sure to include it before `loader.js`
 so that relative paths are resolved before `loader.js` tries to look
 them up.
@@ -228,12 +234,13 @@ have a few lazily loaded modules.
 
 ### `debug.js`
 
-This addon outputs various warnings and error messages that can be
-helpful during development.  For example, a module may depend on another
-module that is supposed to be lazily loaded by `loader.js`; but for some
-reason the second module never loads.  With `debug.js` running you will
-see a console warning after 2 seconds in this scenario.  Without
-`debug.js` The first module would silently wait forever.
+This addon outputs various warnings and error messages to the console
+that can be helpful during development.  For example, a module may
+depend on another module that is supposed to be lazily loaded by
+`loader.js`; but for some reason the second module never loads.  With
+`debug.js` running you will see a console warning after 2 seconds in
+this scenario.  Without `debug.js` The first module would silently wait
+forever.
 
 As an independent addon, `debug.js` can be loaded in development for
 diagnostics and can be left out in production to save space.  Or you can
