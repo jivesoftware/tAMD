@@ -15,6 +15,7 @@ Why another AMD implementation?
 There are a quite a few implementations out there already:
 
 * [RequireJS](http://requirejs.org/)
+* [almond](https://github.com/jrburke/almond)
 * [curl.js](http://github.com/unscriptable/curl)
 * [bdLoad](http://bdframework.org/bdLoad)
 * [JSLocalnet](http://www.localnet.org.es/)
