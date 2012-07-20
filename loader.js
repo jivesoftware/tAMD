@@ -54,7 +54,7 @@ define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
     });
 
     function maybeLoad(id) {
-        var urls, callback, depends, i;
+        var urls;
         if (!require(id) && (urls = mappings[id])) {
             loadInOrder(urls, callbacks[id]);
             delete mappings[id];
