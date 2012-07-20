@@ -37,7 +37,8 @@
 
 define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
     var mappings = {}
-      , callbacks = {};
+      , callbacks = {}
+      , alreadyLoaded = {};
 
     function map(ids, urls, callback) {
         for (var i = 0; i < ids.length; i++) {
@@ -74,6 +75,8 @@ define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
     function noop() {}
 
     function load(src, callback) {
+        if (alreadyLoaded[src]) { callback && callback(); return; }
+
         var firstScript = document.getElementsByTagName('script')[0]
           , head = firstScript.parentNode
           , script = document.createElement('script');
@@ -91,6 +94,7 @@ define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
         var timeout = setTimeout(script.onerror, 5000);
 
         head.insertBefore(script, firstScript);
+        alreadyLoaded[src] = true;
     }
 
     return {

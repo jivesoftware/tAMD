@@ -56,3 +56,16 @@ asyncTest('handles relative module ids if tAMD/resolve is loaded first', 1, func
         start();
     });
 });
+
+asyncTest('does not load a given script more than once', 2, function() {
+    require(['c', 'tAMD/loader'], function(c, loader) {
+        equal(window.dependencyOfC, 'c', 'loaded dependency-of-c.js once');
+        window.dependencyOfC = 'cc';
+
+        loader.map(['e'], ['/test/fixture/dependency-of-c.js', '/test/fixture/e.js']);
+        require(['e'], function(e) {
+            equal(window.dependencyOfC, 'cc', 'did not reload dependency-of-c.js');
+            start();
+        });
+    });
+});
