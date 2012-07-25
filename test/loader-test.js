@@ -69,3 +69,16 @@ asyncTest('does not load a given script more than once', 2, function() {
         });
     });
 });
+
+asyncTest('loads module immediately if URL mapping is given after module is requested', 1, function() {
+    require(['f'], function(f) {
+        equal(f.val, 'f', 'loaded module `f`');
+        start();
+    });
+
+    setTimeout(function() {
+        require(['tAMD/loader'], function(loader) {
+            loader.map(['f'], ['/test/fixture/f.js']);
+        });
+    }, 0);
+});

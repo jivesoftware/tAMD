@@ -38,12 +38,18 @@
 define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
     var mappings = {}
       , callbacks = {}
-      , alreadyLoaded = {};
+      , alreadyLoaded = {}
+      , requested = {};
 
     function map(ids, urls, callback) {
-        for (var i = 0; i < ids.length; i++) {
-            mappings[ids[i]] = urls;
-            callbacks[ids[i]] = callback;
+        var id, i;
+        for (i = 0; i < ids.length; i++) {
+            id = ids[i];
+            mappings[id] = urls;
+            callbacks[id] = callback;
+            if (requested[id]) {
+                maybeLoad(id);
+            }
         }
     }
 
@@ -59,6 +65,8 @@ define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
             loadInOrder(urls, callbacks[id]);
             delete mappings[id];
             delete callbacks[id];
+        } else {
+            requested[id] = true;
         }
     }
 
