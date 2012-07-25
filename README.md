@@ -1,13 +1,14 @@
 tAMD
 =====
 
-Tiny, extensible implementation of the CommonJS
-[Asynchronous Module Definition (AMD)][spec] specification.  The core
-implementation, `define.js` is less than 1 KB compressed.  Integration
-points in module definition and loading allow for any kind of custom
-behavior to be added.
+Tiny, extensible implementation of the CommonJS [Asynchronous Module Definition (AMD)][spec]
+specification.  The core implementation, `define.js`, comes to 824 bytes
+when compressed using [Closure Compiler][] with advanced optimizations.
+Integration points in module definition and loading allow for any kind
+of custom behavior to be added.
 
 [spec]: http://github.com/amdjs/amdjs-api/wiki/AMD
+[Closure Compiler]: https://developers.google.com/closure/compiler/
 
 Why another AMD implementation?
 --------------------------------
