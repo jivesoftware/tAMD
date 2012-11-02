@@ -104,7 +104,6 @@ define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
         script.src = src;
         script.onreadystatechange = script.onload = script.onerror = function() {
             if (!script.readyState || script.readyState === 'loaded' || script.readyState === 'complete') {
-                clearTimeout(timeout);
                 script.onload = script.onreadystatechange = script.onerror = noop;
                 head.removeChild(script);
 
@@ -112,8 +111,6 @@ define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
                 loaded[src] = true;
             }
         };
-
-        var timeout = setTimeout(script.onerror, 5000);
 
         head.insertBefore(script, firstScript);
     }
