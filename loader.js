@@ -38,7 +38,7 @@
 define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
     var mappings = {}
       , callbacks = {}
-      , alreadyLoaded = {}
+      , loaded = {}
       , requested = {};
 
     function map(ids, urls, callback) {
@@ -83,7 +83,19 @@ define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
     function noop() {}
 
     function load(src, callback) {
-        if (alreadyLoaded[src]) { callback && callback(); return; }
+        var prevCallback = loaded[src];
+        if (true === prevCallback) {
+            callback && callback();
+        } else if (callback) {
+            loaded[src] = function() {
+                prevCallback && prevCallback();
+                callback();
+            };
+        }
+
+        if (prevCallback) {
+            return;
+        }
 
         var firstScript = document.getElementsByTagName('script')[0]
           , head = firstScript.parentNode
@@ -95,14 +107,15 @@ define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
                 clearTimeout(timeout);
                 script.onload = script.onreadystatechange = script.onerror = noop;
                 head.removeChild(script);
-                callback && callback();
+
+                (loaded[src] || noop)();
+                loaded[src] = true;
             }
         };
 
         var timeout = setTimeout(script.onerror, 5000);
 
         head.insertBefore(script, firstScript);
-        alreadyLoaded[src] = true;
     }
 
     return {
