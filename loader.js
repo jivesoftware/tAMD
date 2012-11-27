@@ -87,10 +87,7 @@ define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
         if (true === prevCallback) {
             callback && callback();
         } else if (callback) {
-            loaded[src] = function() {
-                prevCallback && prevCallback();
-                callback();
-            };
+            loaded[src] = chain(prevCallback, callback);
         }
 
         if (prevCallback) {
@@ -102,9 +99,10 @@ define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
           , script = document.createElement('script');
 
         script.src = src;
-        script.onreadystatechange = script.onload = script.onerror = function() {
-            if (!script.readyState || script.readyState === 'loaded' || script.readyState === 'complete') {
-                script.onload = script.onreadystatechange = script.onerror = noop;
+        script.async = true;
+        script.onreadystatechange = script.onload = function() {
+            if (!script.readyState || /loaded|complete/.test(script.readyState)) {
+                script.onload = script.onreadystatechange = noop;
                 head.removeChild(script);
 
                 (loaded[src] || noop)();
@@ -113,6 +111,13 @@ define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
         };
 
         head.insertBefore(script, firstScript);
+    }
+
+    function chain(f, g) {
+        return function() {
+            f && f();
+            g();
+        };
     }
 
     return {
