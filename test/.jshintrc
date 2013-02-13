@@ -1,0 +1,40 @@
+{
+    "curly": true,
+    "eqeqeq": true,
+    "immed": true,
+    "latedef": false,
+    "newcap": true,
+    "noarg": true,
+    "sub": true,
+    "undef": true,
+    "unused": false,
+    "boss": false,
+    "eqnull": false,
+    "laxcomma": true,
+    "browser": true,
+    "predef": [
+        "jQuery",
+        "$",
+
+        "QUnit",
+        "module",
+        "test",
+        "asyncTest",
+        "expect",
+        "start",
+        "stop",
+        "ok",
+        "equal",
+        "notEqual",
+        "deepEqual",
+        "notDeepEqual",
+        "strictEqual",
+        "notStrictEqual",
+        "throws",
+
+        "define",
+        "require",
+
+        "reinitialize"
+    ]
+}

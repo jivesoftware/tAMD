@@ -2,13 +2,14 @@ tAMD
 =====
 
 Tiny, extensible implementation of the CommonJS [Asynchronous Module Definition (AMD)][spec]
-specification.  The core implementation, `define.js`, comes to 824 bytes
-when compressed using [Closure Compiler][] with advanced optimizations.
-Integration points in module definition and loading allow for any kind
-of custom behavior to be added.
+specification.  The core implementation, `define.js`, comes to 808 bytes
+when compressed using [Closure Compiler][] with advanced optimizations
+and [UglifyJS][].  Integration points in module definition and loading
+allow for any kind of custom behavior to be added.
 
 [spec]: http://github.com/amdjs/amdjs-api/wiki/AMD
 [Closure Compiler]: https://developers.google.com/closure/compiler/
+[UglifyJS]: https://github.com/mishoo/UglifyJS
 
 Why another AMD implementation?
 --------------------------------
@@ -35,6 +36,55 @@ features are provided as addons.  Some of those are provided in this
 repository to get you started.  You are invited to create your own
 addons to suit your needs.  tAMD is intended to be easy to read and
 easily hackable.
+
+Building
+---------
+
+tAMD is made up of several files that provide required and optional
+functionality.  A ready-made combined file that includes all optional
+functionality is available at [blob/master/dist/tAMD.min.js][minified]
+
+[minified]: blob/master/dist/tAMD.min.js
+
+It is recommended that you build your own custom file to get a smaller
+size.  There is a grunt task provided for this purpose.  To use it you
+will have to clone this repository and [install grunt][].  You will also
+need to have [Java][] installed to run Closure Compiler.
+
+[install grunt]: https://github.com/gruntjs/grunt/tree/0.3-stable#installing-grunt
+[Java]: http://www.java.com/en/download/index.jsp
+
+In the project directory run `grunt compile --components='...'` with
+a space-separated list of the components that you want to include in
+your custom build.  The components that are available are:
+
+* define : this is the only component that is required
+* hooks : depends on define
+* resolve : depends on hooks
+* loader : depends on hooks
+  used
+* debug : depends on hooks
+
+The functionality provided by each component is described in detail
+below.
+
+If you want the smallest possible build with no extra features, use this
+command:
+
+    grunt compile --components='define'
+
+A more typical build might look like this:
+
+    grunt compile --components='define hooks resolve loader'
+
+Minified builds will be output in dist/tAMD.min.js.
+
+If your project has its own resource combining system you can just take
+the individual files that you want.  But the included grunt command has
+the advantages that it will perform aggressive minification using
+Closure Compiler's advanced optimizations and will make sure that your
+components are combined in the correct order with the correct
+dependencies.
 
 Included modules
 ------------------
@@ -234,7 +284,7 @@ This addon is most useful when combined with a server-side script
 combining task that outputs URL mappings automatically; or when you only
 have a few lazily loaded modules.
 
-### `debug.js`
+### `debug.js` - `tAMD/debug`
 
 This addon outputs various warnings and error messages to the console
 that can be helpful during development.  For example, a module may
@@ -246,12 +296,12 @@ forever.
 
 As an independent addon, `debug.js` can be loaded in development for
 diagnostics and can be left out in production to save space.  Or you can
-include it all the time.  Whatever.
+include it all the time.  Whatever you want to do.
 
 License
 --------
 
-Copyright 2012 Jive Software
+Copyright 2012-2013 Jive Software
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

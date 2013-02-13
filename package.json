@@ -1,0 +1,39 @@
+{
+  "name": "tAMD",
+  "version": "0.1.0",
+  "description": "Tiny, extensible implementation of the Asynchronous Module Definition (AMD) specification from CommonJS",
+  "homepage": "https://github.com/jivesoftware/tAMD",
+  "author": {
+    "name": "Jesse Hallett",
+    "email": "hallettj@gmail.com",
+    "url": "http://sitr.us/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jivesoftware/tAMD.git"
+  },
+  "bugs": "https://github.com/jivesoftware/tAMD/issues",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "https://github.com/jivesoftware/tAMD/blob/master/LICENSE-Apache-2.0"
+    }
+  ],
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "0.1.1rc6",
+    "grunt-contrib-qunit": "0.1.1rc6",
+    "grunt-contrib-uglify": "0.1.1rc6",
+    "grunt-contrib-watch": "0.2.0rc7",
+    "grunt-contrib-clean": "0.4.0rc6",
+    "grunt-contrib-connect": "~0.1.0",
+    "grunt-closure-tools": "~0.7.2",
+    "grunt": "0.4.0rc7",
+    "underscore": "~1.4.4"
+  }
+}

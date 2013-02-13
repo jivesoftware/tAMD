@@ -1,16 +1,16 @@
-/*globals reinitialize define require */
-/*globals test asyncTest ok equal strictEqual stop start */
-
-var console;
+(function() {
+var global = this;
 
 module('tAMD/debug', {
     setup: function() {
         var that = this;
 
-        this.origConsoleWarn = typeof console !== 'undefined' ? console.warn : null;
-        this.origConsoleError = typeof console !== 'undefined' ? console.error : null;
+        this.origConsoleWarn  = global.console ? global.console.warn  : null;
+        this.origConsoleError = global.console ? global.console.error : null;
 
-        console = console || {};
+        if (!global.console) {
+            global.console = {};
+        }
 
         stop();
         reinitialize().then(function() {
@@ -24,20 +24,20 @@ module('tAMD/debug', {
         });
     },
     teardown: function() {
-        delete console.warn;
-        delete console.error;
+        delete global.console.warn;
+        delete global.console.error;
 
         if (this.origConsoleWarn) {
-            console.warn = this.origConsoleWarn;
+            global.console.warn = this.origConsoleWarn;
         }
         if (this.origConsoleError) {
-            console.error = this.origConsoleError;
+            global.console.error = this.origConsoleError;
         }
     }
 });
 
 test('warns if module factory/value is not valid', 2, function() {
-    console.warn = function(msg, name) {
+    global.console.warn = function(msg, name) {
         ok(/definition must be an object or a function/i.test(msg), 'got message about bad module value');
         equal(name, 'moduleWithBadValue', 'message relates to `moduleWithBadValue`');
     };
@@ -46,7 +46,7 @@ test('warns if module factory/value is not valid', 2, function() {
 });
 
 test('emits error if relative module id is assigned to a module', 2, function() {
-    console.error = function(msg, name) {
+    global.console.error = function(msg, name) {
         ok(/cannot be relative/i.test(msg), 'got message about bad module id');
         equal(name, './relativeModule', 'message relates to `./relativeModule`');
     };
@@ -59,7 +59,7 @@ asyncTest('warns if required module is not loaded within 2 seconds', 1, function
         ok(false, '`nonexistentModule` does not exist');
     });
 
-    console.warn = function(msg, name) {
+    global.console.warn = function(msg, name) {
         if (name === 'nonexistentModule') {
             ok(/missing/i.test(msg), 'got message about missing module');
             start();
@@ -68,7 +68,7 @@ asyncTest('warns if required module is not loaded within 2 seconds', 1, function
 });
 
 test('warns of duplicate module definitions', 2, function() {
-    console.warn = function(msg, name) {
+    global.console.warn = function(msg, name) {
         ok(/already defined/i.test(msg), 'got message about duplicate module definition');
         equal(name, 'duplicatedModule', 'message relates to `duplicatedModule`');
     };
@@ -76,3 +76,5 @@ test('warns of duplicate module definitions', 2, function() {
     define('duplicatedModule', {});
     define('duplicatedModule', {});
 });
+
+}());

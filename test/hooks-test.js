@@ -1,6 +1,3 @@
-/*globals define require */
-/*globals reinitialize test asyncTest ok equal strictEqual deepEqual stop start */
-
 module('tAMD/hooks', {
     setup: function() {
         var that = this;

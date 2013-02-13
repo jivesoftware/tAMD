@@ -1,6 +1,3 @@
-/*globals reinitialize define require */
-/*globals test asyncTest ok equal strictEqual stop start */
-
 module('tAMD/loader', {
     setup: function() {
         var that = this;
@@ -63,7 +60,7 @@ asyncTest('does not load a given script more than once', 2, function() {
         window.dependencyOfC = 'cc';
 
         loader.map(['e'], ['/test/fixture/dependency-of-c.js', '/test/fixture/e.js']);
-        require(['e'], function(e) {
+        require(['e'], function() {
             equal(window.dependencyOfC, 'cc', 'did not reload dependency-of-c.js');
             start();
         });

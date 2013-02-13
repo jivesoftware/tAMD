@@ -1,6 +1,3 @@
-/*globals reinitialize define require */
-/*globals test asyncTest strictEqual stop start */
-
 module('tAMD/define', {
     setup: function() {
         var that = this;

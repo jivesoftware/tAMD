@@ -1,6 +1,3 @@
-/*globals reinitialize define require */
-/*globals test asyncTest ok equal strictEqual raises stop start */
-
 module('tAMD/resolve', {
     setup: function() {
         var that = this;
@@ -51,7 +48,7 @@ test('walks up path structure', 1, function() {
 });
 
 test('throws error if relative path would break out of root context', 1, function() {
-    raises(function() {
+    throws(function() {
         require(['../foo'], function(foo) {
             ok(false, 'the dependency "../foo" should not be possible to satisfy');
         });

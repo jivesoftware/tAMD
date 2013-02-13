@@ -1,3 +1,3 @@
-/*globals dependencyOfC */
+/*global dependencyOfC */
 
 define('c', { val: dependencyOfC });
