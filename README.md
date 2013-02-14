@@ -60,7 +60,7 @@ your custom build.  The components that are available are:
 
 * define : this is the only component that is required
 * hooks : depends on define
-* resolve : depends on hooks
+* normalize : depends on hooks
 * loader : depends on hooks
   used
 * debug : depends on hooks
@@ -75,7 +75,7 @@ command:
 
 A more typical build might look like this:
 
-    grunt compile --components='define hooks resolve loader'
+    grunt compile --components='define hooks normalize loader'
 
 Minified builds will be output in dist/tAMD.min.js.
 
@@ -199,23 +199,23 @@ that was requested and the name of the module that did the requesting.
 If a dependency is referenced by async `require()` or by a `define()`
 call with no module name then the second argument will be `undefined`.
 Here is a quick and dirty example of how to use a "require" hook to
-resolve relative module paths:
+normalize relative module paths:
 
     require(['tAMD/hooks'], function(hooks) {
         hooks.on('require', function(id, contextId) {
             var contextParts = contextId ? contextId.split('/') : [];
             var idParts = id.split('/');
-            var dir, module, resolved;
+            var dir, module, normalized;
 
             if (idParts[0] === '.') {
                 dir = contextParts.slice(0,-1);
                 module = idParts.slice(1);
-                resolved = dir.concat(module);
+                normalized = dir.concat(module);
             } else {
-                resolved = idParts;
+                normalized = idParts;
             }
 
-            return [resolved.join('/'), contextId];
+            return [normalized.join('/'), contextId];
         });
     });
 
@@ -230,7 +230,7 @@ In which case the arguments given to the "require" hook callback would
 be `"./hooks"` and `"tAMD/myAddon"`.
 
 This is just an example.  There is a better implementation of relative
-path resolution in `resolve.js`.
+path resolution in `normalize.js`.
 
 In the example above there was no module name argument given to the
 "require" hook.  The hook can be given a module name, which will cause
@@ -243,15 +243,15 @@ You cannot cancel a "require" event.  However, if you have multiple
 later callbacks from running.  The behavior is sort of like
 `event.stopImmediatePropagation()` in DOM event handlers.
 
-### `resolve.js` - `tAMD/resolve`
+### `normalize.js` - `tAMD/normalize`
 
 When this addon is included dependencies that are given as relative
-paths are automatically resolved.  Relative paths will probably not work
+paths are automatically normalized.  Relative paths will probably not work
 as you expect unless you include this addon or one like it.
 
-This addon includes a module called `tAMD/resolve`, which exports
+This addon includes a module called `tAMD/normalize`, which exports
 a function that takes a module id, which may or may not be a relative
-path, and a context and returns the resolved module name.
+path, and a context and returns the normalized module name.
 
 ### `loader.js` - `tAMD/loader`
 
@@ -275,8 +275,8 @@ a dependency then the given URLs will be loaded in order.
 Note that the synchronous version of `require()` does not trigger lazy
 loading.  loader.js only works on asynchronous dependencies.
 
-If you are using `resolve.js` make sure to include it before `loader.js`
-so that relative paths are resolved before `loader.js` tries to look
+If you are using `normalize.js` make sure to include it before `loader.js`
+so that relative paths are normalized before `loader.js` tries to look
 them up.
 
 With `loader.js` you have to specify a URL mapping for every module.

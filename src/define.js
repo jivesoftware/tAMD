@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-/*jshint laxcomma:true sub:true boss:true loopfunc:true */
+/*jshint boss:true loopfunc:true */
 
 (function(global, undef) {
     var definitions = {}

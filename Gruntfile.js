@@ -25,7 +25,7 @@ module.exports = function(grunt) {
         src: getComponents() || [
           'src/define.js',
           'src/hooks.js',
-          'src/resolve.js',
+          'src/normalize.js',
           'src/loader.js',
           'src/debug.js'
         ],
@@ -99,7 +99,7 @@ module.exports = function(grunt) {
     var deps = {
       define: [],
       hooks: ['define'],
-      resolve: ['define', 'hooks'],
+      normalize: ['define', 'hooks'],
       loader: ['define', 'hooks'],
       debug: ['define', 'hooks']
     };
@@ -114,7 +114,7 @@ module.exports = function(grunt) {
       .uniq()
       .value();
 
-      if (ds.indexOf('resolve') > ds.indexOf('loader') && ds.indexOf('loader') > -1) {
+      if (ds.indexOf('normalize') > ds.indexOf('loader') && ds.indexOf('loader') > -1) {
         ret = ds.filter(function(c) {
           return c !== 'loader';
         }).concat('loader');

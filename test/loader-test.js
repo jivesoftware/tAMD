@@ -47,7 +47,7 @@ asyncTest('loads multiple scripts in order', 1, function() {
     });
 });
 
-asyncTest('handles relative module ids if tAMD/resolve is loaded first', 1, function() {
+asyncTest('handles relative module ids if tAMD/normalize is loaded first', 1, function() {
     define('namespace/d', ['../a'], function(a) {
         equal(a.val, 'a', 'loaded module `a` using a relative module id');
         start();
