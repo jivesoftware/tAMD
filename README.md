@@ -1,4 +1,4 @@
-tAMD [![Build Status](https://travis-ci.org/jivesoftware/tAMD.png?branch=master)](https://travis-ci.org/jivesoftware/tAMD)
+tAMD [![Build Status](https://travis-ci.org/jivesoftware/tAMD.png?branch=v1.0)](https://travis-ci.org/jivesoftware/tAMD)
 =====
 
 Tiny, extensible implementation of the CommonJS [Asynchronous Module Definition (AMD)][spec]
