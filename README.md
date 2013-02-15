@@ -2,7 +2,7 @@ tAMD [![Build Status](https://travis-ci.org/jivesoftware/tAMD.png?branch=v1.0)](
 =====
 
 Tiny, extensible implementation of the CommonJS [Asynchronous Module Definition (AMD)][spec]
-specification.  The core implementation, `define.js`, comes to 808 bytes
+specification.  The core implementation, `define.js`, comes to 812 bytes
 when compressed using [Closure Compiler][] with advanced optimizations
 and [UglifyJS][].  Integration points in module definition and loading
 allow for any kind of custom behavior to be added.
@@ -142,47 +142,47 @@ dependency loading.
 
 There are three lifecycle events that you can register callbacks for:
 
-* define : `hooks.on('define', [moduleName], function(id, dependencies, factory){})`
-* publish : `hooks.on('publish', [moduleName], function(id, moduleValue){})`
-* require : `hooks.on('require', [moduleName], function(id, contextId){})`
+* define : `hooks.on('define', [moduleName], function(id, dependencies, factory, fn){})`
+* publish : `hooks.on('publish', [moduleName], function(id, moduleValue, fn){})`
+* require : `hooks.on('require', [moduleName], function(id, contextId, fn){})`
 
 Use the "define" hook to run a callback as soon as a module is declared
 via a call to `define()` before its dependencies are resolved or its
 factory is invoked:
 
     require(['tAMD/hooks'], function(hooks) {
-        hooks.on('define', 'someOldModule', function(id, dependencies, factory) {
+        hooks.on('define', 'someOldModule', function(id, dependencies, factory, fn) {
             revisedDeps = dependencies.map(function(dep) {
                 return dep === 'jquery' ? 'jquery-1.4' : dep;
             });
-            return [id, revisedDependencies, factory];
+            fn(id, revisedDependencies, factory);
         });
     });
 
 The above example intercepts the definition of a module called
 "someOldModule" and replaces its dependency on jQuery with an older
-jQuery version.  By modifying the array that is returned you could also
+jQuery version.  By modifying the arguments given to `fn` you could also
 change the name of the module or replace or wrap its factory.
 
-You can return `false` from a "define" hook to cancel the module.  In
-that case the module's dependencies are not resolved and its factory is
-never invoked.
+The last argument to a callback will always be a function that is called
+to signal that the callback is complete.  In this way lifecycle
+callbacks can operate asynchronously.  If that function is never called
+then the define, publish, or require operation will never complete.
 
-If you do not return a value from a "define" hook then the module is
-created normally.  You can use this feature for whatever kind of
-side-effects you might want.  For example, `loader.js` initiates lazy
-dependency loading via a "define" hook.
+In a "define" hook, if you choose not to invoke `fn` the module
+definition will effectively be cancelled.  In that case the module's
+dependencies are not resolved and its factory is never invoked.
 
 The "publish" hook is similar; except that its callbacks are invoked
 after the module's factory is executed.  In a "publish" hook you can
 change the name of a module, tweak or replace the value that the module
-exports, or return `false` to prevent the module from becoming available
-as a dependency to other modules.  For example:
+exports, prevent the module from becoming available as a dependency to
+other modules by not invoking `fn`.  For example:
 
     require(['tAMD/hooks'], function(hooks) {
-        hooks.on('publish', 'jquery', function(id, moduleValue) {
+        hooks.on('publish', 'jquery', function(id, moduleValue, fn) {
             var version = moduleValue.fn.jquery;  // moduleValue === jQuery in this case
-            return ['jquery-'+ version, moduleValue];
+            fn('jquery-'+ version, moduleValue);
         });
     });
 
@@ -195,14 +195,14 @@ invoked with dependencies, each dependency name is run through any
 "require" hooks before the dependency is actually looked up.
 
 Two arguments are given to "require" callbacks: the name of the module
-that was requested and the name of the module that did the requesting.
-If a dependency is referenced by async `require()` or by a `define()`
-call with no module name then the second argument will be `undefined`.
-Here is a quick and dirty example of how to use a "require" hook to
-normalize relative module paths:
+that is required and the name of the module where the require event
+originated.  If a dependency is referenced by async `require()` or by
+a `define()` call with no module name then the second argument will be
+`undefined`.  Here is a quick and dirty example of how to use
+a "require" hook to normalize relative module paths:
 
     require(['tAMD/hooks'], function(hooks) {
-        hooks.on('require', function(id, contextId) {
+        hooks.on('require', function(id, contextId, fn) {
             var contextParts = contextId ? contextId.split('/') : [];
             var idParts = id.split('/');
             var dir, module, normalized;
@@ -215,7 +215,7 @@ normalize relative module paths:
                 normalized = idParts;
             }
 
-            return [normalized.join('/'), contextId];
+            fn(normalized.join('/'), contextId);
         });
     });
 
@@ -238,10 +238,10 @@ it to act only on that module, as with "define" and "publish".  But with
 all three hook types if you exclude the module name argument then the
 hook will act on *all* modules.
 
-You cannot cancel a "require" event.  However, if you have multiple
-"require" hooks registered, returning `false` from one will prevent
-later callbacks from running.  The behavior is sort of like
-`event.stopImmediatePropagation()` in DOM event handlers.
+As with "define" and "publish", you can cancel "require" events by not
+invoking `fn`.  If a "require" event is triggered by a dependency list
+in a `define()` call then the corresponding "define" event will also be
+cancelled.
 
 ### `normalize.js` - `tAMD/normalize`
 

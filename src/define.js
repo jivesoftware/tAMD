@@ -29,42 +29,45 @@ function define(/* [id], [dependencies], factory */) {
     var args = [].slice.call(arguments)
       , id = typeof args[0] === 'string' ? args.shift() : undef
       , dependencies = args.length > 1 ? args.shift() : []
-      , factory = args[0]
-      , hooked = tAMD._pre(id, dependencies, factory);
+      , factory = args[0];
 
-    if (hooked !== false) {
-        if (hooked) {
-            id = hooked[0];
-            dependencies = hooked[1];
-            factory = hooked[2];
-        }
-
+    tAMD._pre(function(id_, dependencies_, factory_) {
         run(function() {
-            addDefinition(id, map(function(d) { return requireSync(d, id); }, dependencies), factory);
-        }, dependencies);
-    }
+            addDefinition(id_, map(function(d) { return requireSync(d, id_, 1); }, dependencies_), factory_);
+        }, dependencies_);
+    }, id, dependencies, factory);
 }
 define['amd'] = {};  // According to the spec, define should have this property.
 
 var require = define;
 
-function requireSync(id, contextId) {
+function requireSync(id, contextId, skipHook) {
     if (id === 'require') {
         return function(id) {
             return requireSync(id, contextId);
         };
     }
 
-    var hooked = tAMD._req(id, contextId);
-    return definitions[(hooked && hooked[0]) || id];
+    var ret;
+
+    if (skipHook) {
+        ret = definitions[id];
+    }
+    else {
+        tAMD._req(function(id_) {
+            ret = definitions[id_];
+        }, id, contextId);
+    }
+
+    return ret;
 }
 
-function noop() {}
+function stubHook(fn) { fn.apply(undef, [].slice.call(arguments, 1)); }
 
 var tAMD = {
-    _pre: noop,
-    _post: noop,
-    _req: noop
+    _pre: stubHook,
+    _post: stubHook,
+    _req: stubHook
 };
 define('tAMD', tAMD);
 satisfy('require');
@@ -74,20 +77,14 @@ global['require'] = require;
 
 function addDefinition(id, dependencies, factory) {
     var moduleValue = typeof factory === 'function' ?
-          factory.apply(undef, dependencies) : factory
-      , hooked = tAMD._post(id, moduleValue);
+          factory.apply(undef, dependencies) : factory;
 
-    if (hooked !== false) {
-        if (hooked) {
-            id = hooked[0];
-            moduleValue = hooked[1];
+    tAMD._post(function(id_, moduleValue_) {
+        if (moduleValue_ && id_) {
+            definitions[id_] = moduleValue_;
+            satisfy(id_);
         }
-
-        if (moduleValue && id) {
-            definitions[id] = moduleValue;
-            satisfy(id);
-        }
-    }
+    }, id, moduleValue);
 }
 
 function map(f, array) {

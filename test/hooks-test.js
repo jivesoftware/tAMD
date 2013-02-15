@@ -36,8 +36,8 @@ module('tAMD/hooks', {
 test('changes module id before invoking factory', 1, function() {
     var myModule = {};
 
-    this.onDefine('myModule', function(id, dependencies, factory) {
-        return ['myAwesomeModule', dependencies, factory];
+    this.onDefine('myModule', function(id, dependencies, factory, fn) {
+        fn('myAwesomeModule', dependencies, factory);
     });
 
     define('myModule', ['foo', 'bar'], function(foo, bar) {
@@ -56,12 +56,12 @@ test('changes module id before invoking factory', 1, function() {
 test('swaps module dependencies', 1, function() {
     var foo2 = {}, that = this;
 
-    this.onDefine('myModule', function(id, dependencies, factory) {
+    this.onDefine('myModule', function(id, dependencies, factory, fn) {
         var swapped = $.map(dependencies, function(dep) {
             return dep === 'foo' ? 'foo2' : dep;
         });
 
-        return [id, swapped, factory];
+        fn(id, swapped, factory);
     });
 
     define('foo2', foo2);
@@ -74,12 +74,12 @@ test('swaps module dependencies', 1, function() {
 test('swaps module factory', 1, function() {
     var myModule = {}, myModule2 = {}, that = this;
 
-    this.onDefine('myModule', function(id, dependencies, factory) {
+    this.onDefine('myModule', function(id, dependencies, factory, fn) {
         var swappedFactory = function() {
             return myModule2;
         };
 
-        return [id, dependencies, swappedFactory];
+        fn(id, dependencies, swappedFactory);
     });
 
     define('myModule', function() {
@@ -91,9 +91,9 @@ test('swaps module factory', 1, function() {
     });
 });
 
-test('cancels module definition', 0, function() {
-    this.onDefine('myModule', function(id, dependencies, factory) {
-        return false;
+asyncTest('cancels module definition', 0, function() {
+    this.onDefine('myModule', function(id, dependencies, factory, fn) {
+        // Does not invoke fn
     });
 
     define('myModule', ['foo', 'bar'], function(foo, bar) {
@@ -104,6 +104,8 @@ test('cancels module definition', 0, function() {
     require(['myModule'], function(mm) {
         ok(false, 'module is never registered');
     });
+
+    setTimeout(start, 100);
 });
 
 test('runs before all module definitions', 2, function() {
@@ -112,11 +114,12 @@ test('runs before all module definitions', 2, function() {
     }
 
     require(['tAMD/hooks'], function(hooks) {
-        hooks.on('define', function(id, dependencies, factory) {
+        hooks.on('define', function(id, dependencies, factory, fn) {
             if (id === 'myModule') {
                 deepEqual(dependencies, ['foo', 'bar'], 'get to inspect dependencies list for every module defined');
                 strictEqual(factory, myModuleFactory, 'get to inspect factory for every module defined');
             }
+            fn(id, dependencies, factory);
         });
     });
 
@@ -126,8 +129,8 @@ test('runs before all module definitions', 2, function() {
 test('changes module id after invoking factory', 1, function() {
     var myModule = {};
 
-    this.onPublish('myModule', function(id, moduleValue) {
-        return ['myAwesomeModule', moduleValue];
+    this.onPublish('myModule', function(id, moduleValue, fn) {
+        fn('myAwesomeModule', moduleValue);
     });
 
     define('myModule', function() {
@@ -146,8 +149,9 @@ test('changes module id after invoking factory', 1, function() {
 test('patches module value', 2, function() {
     var myModule = { val: 1 };
 
-    this.onPublish('myModule', function(id, moduleValue) {
+    this.onPublish('myModule', function(id, moduleValue, fn) {
         moduleValue.val = 2;
+        fn(id, moduleValue);
     });
 
     define('myModule', myModule);
@@ -158,9 +162,9 @@ test('patches module value', 2, function() {
     });
 });
 
-test('cancels module registration', 1, function() {
-    this.onPublish('myModule', function(id, moduleValue) {
-        return false;
+asyncTest('cancels module registration', 1, function() {
+    this.onPublish('myModule', function(id, moduleValue, fn) {
+        // Does not invoke fn
     });
 
     define('myModule', ['foo', 'bar'], function(foo, bar) {
@@ -171,16 +175,19 @@ test('cancels module registration', 1, function() {
     require(['myModule'], function(mm) {
         ok(false, 'module is never registered');
     });
+
+    setTimeout(start, 100);
 });
 
 test('runs after all module definitions but before modules are made accessible as dependencies in other modules', 1, function() {
     var myModule = {};
 
     require(['tAMD/hooks'], function(hooks) {
-        hooks.on('publish', function(id, moduleValue) {
+        hooks.on('publish', function(id, moduleValue, fn) {
             if (id === 'myModule') {
                 strictEqual(moduleValue, myModule, 'get to inspect exported value of every module defined');
             }
+            fn(id, moduleValue);
         });
     });
 
@@ -190,8 +197,8 @@ test('runs after all module definitions but before modules are made accessible a
 test('swaps module on dependency lookup', 1, function() {
     var foo2 = {};
 
-    this.onRequire('foo', function(id, contextId) {
-        return ['foo2', contextId];
+    this.onRequire('foo', function(id, contextId, fn) {
+        fn('foo2', contextId);
     });
 
     define('foo2', foo2);
@@ -202,10 +209,11 @@ test('swaps module on dependency lookup', 1, function() {
 });
 
 test('gets context in which module is required', 1, function() {
-    this.onRequire('foo', function(id, contextId) {
+    this.onRequire('foo', function(id, contextId, fn) {
         if (contextId === 'myModule') {
             equal(contextId, 'myModule', 'we can see that `foo` is required by `myModule`');
         }
+        fn(id, contextId);
     });
 
     define('myModule', ['foo'], function(foo) {
@@ -214,8 +222,9 @@ test('gets context in which module is required', 1, function() {
 });
 
 test('gets context in which module is required on sync require', function() {
-    this.onRequire('foo', function(id, contextId) {
+    this.onRequire('foo', function(id, contextId, fn) {
         equal(contextId, 'myModule', 'we can see that `foo` is required by `myModule`');
+        fn(id, contextId);
     });
 
     define('myModule', ['require'], function(require) {
@@ -225,12 +234,13 @@ test('gets context in which module is required on sync require', function() {
 
 test('runs on every dependency lookup', 2, function() {
     require(['tAMD/hooks'], function(hooks) {
-        hooks.on('require', function(id, contextId) {
+        hooks.on('require', function(id, contextId, fn) {
             if (id === 'foo' && contextId === 'myModule') {
                 ok(true, 'we can see that `foo` is required by `myModule`');
             } else if (id === 'bar' && contextId === 'myModule') {
                 ok(true, 'we can see that `bar` is required by `myModule`');
             }
+            fn(id, contextId);
         });
     });
 
@@ -240,12 +250,14 @@ test('runs on every dependency lookup', 2, function() {
 });
 
 test('removes a hook for a given event type and module id', 1, function() {
-    function aCallback(id, dependencies, factory) {
+    function aCallback(id, dependencies, factory, fn) {
         ok(false, 'the "define" callback should never be called');
+        fn(id, dependencies, factory);
     }
 
-    function bCallback(id, dependencies, factory) {
+    function bCallback(id, dependencies, factory, fn) {
         ok(true, 'the second "define" callback should be called');
+        fn(id, dependencies, factory);
     }
 
     this.onDefine('nao', aCallback);
@@ -258,12 +270,14 @@ test('removes a hook for a given event type and module id', 1, function() {
 });
 
 test('removes all callbacks for a given module and event type', 0, function() {
-    function aCallback(id, dependencies, factory) {
+    function aCallback(id, dependencies, factory, fn) {
         ok(false, 'the first "define" callback should never be called');
+        fn(id, dependencies, factory);
     }
 
-    function bCallback(id, dependencies, factory) {
+    function bCallback(id, dependencies, factory, fn) {
         ok(false, 'the second "define" callback should never be called');
+        fn(id, dependencies, factory);
     }
 
     this.onDefine('nao', aCallback);
@@ -276,12 +290,14 @@ test('removes all callbacks for a given module and event type', 0, function() {
 });
 
 test('removes a callback that runs on all module ids for a given event type', 1, function() {
-    function aCallback(id, dependencies, factory) {
+    function aCallback(id, dependencies, factory, fn) {
         ok(false, 'the "define" callback should never be called');
+        fn(id, dependencies, factory);
     }
 
-    function bCallback(id, dependencies, factory) {
+    function bCallback(id, dependencies, factory, fn) {
         ok(true, 'the second "define" callback should be called');
+        fn(id, dependencies, factory);
     }
 
     require(['tAMD/hooks'], function(hooks) {
@@ -294,12 +310,14 @@ test('removes a callback that runs on all module ids for a given event type', 1,
 });
 
 test('removes all callbacks that run on all module ids for a given event type', 0, function() {
-    function aCallback(id, dependencies, factory) {
+    function aCallback(id, dependencies, factory, fn) {
         ok(false, 'the first "define" callback should never be called');
+        fn(id, dependencies, factory);
     }
 
-    function bCallback(id, dependencies, factory) {
+    function bCallback(id, dependencies, factory, fn) {
         ok(false, 'the second "define" callback should never be called');
+        fn(id, dependencies, factory);
     }
 
     require(['tAMD/hooks'], function(hooks) {

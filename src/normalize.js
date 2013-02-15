@@ -25,12 +25,12 @@
 /*global define */
 
 define('tAMD/normalize', ['tAMD/hooks'], function(hooks) {
-    hooks['on']('define', function(id, dependencies, factory) {
-        return [id, map(function(d) { return normalize(d, id); }, dependencies), factory];
+    hooks['on']('define', function(id, dependencies, factory, fn) {
+        fn(id, map(function(d) { return normalize(d, id); }, dependencies), factory);
     });
 
-    hooks['on']('require', function(id, contextId) {
-        return [normalize(id, contextId), contextId];
+    hooks['on']('require', function(id, contextId, fn) {
+        fn(normalize(id, contextId), contextId);
     });
 
     var relative = /^\.\.?\//;
