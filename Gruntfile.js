@@ -26,6 +26,7 @@ module.exports = function(grunt) {
           'src/define.js',
           'src/hooks.js',
           'src/normalize.js',
+          'src/plugins.js',
           'src/loader.js',
           'src/debug.js'
         ],
@@ -100,6 +101,7 @@ module.exports = function(grunt) {
       define: [],
       hooks: ['define'],
       normalize: ['define', 'hooks'],
+      plugins: ['define', 'hooks', 'normalize'],
       loader: ['define', 'hooks'],
       debug: ['define', 'hooks']
     };

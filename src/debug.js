@@ -30,15 +30,17 @@ define('tAMD/debug', ['tAMD/hooks', 'require'], function(hooks, requireSync) {
     hooks['on']('define', function(id, dependencies, factory, next) {
         warnIfValueMissing(id, factory);
         errorIfRelative(id);
-        for (var i = 0; i < dependencies.length; i++) {
-            warnIfMissing(dependencies[i]);
-        }
         next(id, dependencies, factory);
     });
 
     hooks['on']('publish', function(id, moduleValue, next) {
         warnIfDuplicate(id);
         next(id, moduleValue);
+    });
+
+    hooks['on']('require', function(id, contextId, next) {
+        warnIfMissing(id);
+        next(id, contextId);
     });
 
     function warnIfDuplicate(id) {

@@ -5,6 +5,7 @@
   argument that must be called when the hook is finished.
 * Callbacks run earlier on async 'require' events, which allows async
   side-effects in those callbacks.
+* Adds 'plugins'
 
 ## Version 0.1.0
 
