@@ -42,9 +42,9 @@ Building
 
 tAMD is made up of several files that provide required and optional
 functionality.  A ready-made combined file that includes all optional
-functionality is available at [blob/master/dist/tAMD.min.js][minified]
+functionality is available at [dist/tAMD.min.js][minified]
 
-[minified]: blob/master/dist/tAMD.min.js
+[minified]: https://raw.github.com/jivesoftware/tAMD/master/dist/tAMD.min.js
 
 It is recommended that you build your own custom file to get a smaller
 size.  There is a grunt task provided for this purpose.  To use it you
