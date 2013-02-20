@@ -1,6 +1,6 @@
 {
   "name": "tAMD",
-  "version": "0.1.0",
+  "version": "1.0.0-pre",
   "description": "Tiny, extensible implementation of the Asynchronous Module Definition (AMD) specification from CommonJS",
   "homepage": "https://github.com/jivesoftware/tAMD",
   "author": {
