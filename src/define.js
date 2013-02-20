@@ -20,134 +20,136 @@
 
 /*jshint boss:true loopfunc:true */
 
-(function(global, undef) {
-    var definitions = {}
-      , required = {};
+var global      = this
+  , definitions = {}
+  , required    = {}
+  , undef;
 
-    function define(/* [id], [dependencies], factory */) {
-        var args = [].slice.call(arguments)
-          , id = typeof args[0] === 'string' ? args.shift() : undef
-          , dependencies = args.length > 1 ? args.shift() : []
-          , factory = args[0]
-          , hooked = tAMD._pre(id, dependencies, factory);
+function define(/* [id], [dependencies], factory */) {
+    var args = [].slice.call(arguments)
+      , id = typeof args[0] === 'string' ? args.shift() : undef
+      , dependencies = args.length > 1 ? args.shift() : []
+      , factory = args[0]
+      , hooked = tAMD._pre(id, dependencies, factory);
 
-        if (hooked !== false) {
-            if (hooked) {
-                id = hooked[0];
-                dependencies = hooked[1];
-                factory = hooked[2];
-            }
-
-            run(function() {
-                addDefinition(id, map(function(d) { return requireSync(d, id); }, dependencies), factory);
-            }, dependencies);
-        }
-    }
-    define['amd'] = {};  // According to the spec, define should have this property.
-
-    function requireSync(id, contextId) {
-        if (id === 'require') {
-            return function(id) {
-                return requireSync(id, contextId);
-            };
+    if (hooked !== false) {
+        if (hooked) {
+            id = hooked[0];
+            dependencies = hooked[1];
+            factory = hooked[2];
         }
 
-        var hooked = tAMD._req(id, contextId);
-        return definitions[(hooked && hooked[0]) || id];
+        run(function() {
+            addDefinition(id, map(function(d) { return requireSync(d, id); }, dependencies), factory);
+        }, dependencies);
+    }
+}
+define['amd'] = {};  // According to the spec, define should have this property.
+
+var require = define;
+
+function requireSync(id, contextId) {
+    if (id === 'require') {
+        return function(id) {
+            return requireSync(id, contextId);
+        };
     }
 
-    function noop() {}
+    var hooked = tAMD._req(id, contextId);
+    return definitions[(hooked && hooked[0]) || id];
+}
 
-    var tAMD = {
-        _pre: noop,
-        _post: noop,
-        _req: noop
-    };
-    define('tAMD', tAMD);
-    satisfy('require');
+function noop() {}
 
-    global['define'] = define;
-    global['require'] = define;
+var tAMD = {
+    _pre: noop,
+    _post: noop,
+    _req: noop
+};
+define('tAMD', tAMD);
+satisfy('require');
 
-    function addDefinition(id, dependencies, factory) {
-        var moduleValue = typeof factory === 'function' ?
-              factory.apply(undef, dependencies) : factory
-          , hooked = tAMD._post(id, moduleValue);
+global['define'] = define;
+global['require'] = require;
 
-        if (hooked !== false) {
-            if (hooked) {
-                id = hooked[0];
-                moduleValue = hooked[1];
-            }
+function addDefinition(id, dependencies, factory) {
+    var moduleValue = typeof factory === 'function' ?
+          factory.apply(undef, dependencies) : factory
+      , hooked = tAMD._post(id, moduleValue);
 
-            if (moduleValue && id) {
-                definitions[id] = moduleValue;
-                satisfy(id);
-            }
+    if (hooked !== false) {
+        if (hooked) {
+            id = hooked[0];
+            moduleValue = hooked[1];
+        }
+
+        if (moduleValue && id) {
+            definitions[id] = moduleValue;
+            satisfy(id);
         }
     }
+}
 
-    function map(f, array) {
-        var results = [];
-        for (var i = 0; i < array.length; i++) {
-            results.push(f(array[i]));
-        }
-        return results;
+function map(f, array) {
+    var results = [];
+    for (var i = 0; i < array.length; i++) {
+        results.push(f(array[i]));
+    }
+    return results;
+}
+
+/**
+ * The functions run() and satisfy() are adapted from the Kongregate
+ * Asynchronous JavaScript Loader
+ * https://gist.github.com/388e70bccd3fdb8a6617
+ *
+ * The MIT License
+ *
+ * Copyright (c) 2010 Kongregate Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+function run(fn, dependencies) {
+    var ifn, len = dependencies.length;
+
+    if (!len) {
+        fn();
+    } else if (1 === len) {
+        ifn = fn;
+    } else {
+        var count = len;
+        ifn = function() { if (!--count) { fn(); } };
     }
 
-    /**
-     * The functions run() and satisfy() are adapted from the Kongregate
-     * Asynchronous JavaScript Loader
-     * https://gist.github.com/388e70bccd3fdb8a6617
-     *
-     * The MIT License
-     *
-     * Copyright (c) 2010 Kongregate Inc.
-     *
-     * Permission is hereby granted, free of charge, to any person obtaining a copy
-     * of this software and associated documentation files (the "Software"), to deal
-     * in the Software without restriction, including without limitation the rights
-     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-     * copies of the Software, and to permit persons to whom the Software is
-     * furnished to do so, subject to the following conditions:
-     *
-     * The above copyright notice and this permission notice shall be included in
-     * all copies or substantial portions of the Software.
-     *
-     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-     * THE SOFTWARE.
-     */
-    function run(fn, dependencies) {
-        var ifn, len = dependencies.length;
-
-        if (!len) {
-            fn();
-        } else if (1 === len) {
-            ifn = fn;
+    for (var i = 0; i < len; i++) {
+        var depFn = required[dependencies[i]];
+        if (true === depFn) {
+            ifn();
         } else {
-            var count = len;
-            ifn = function() { if (!--count) { fn(); } };
-        }
-
-        for (var i = 0; i < len; i++) {
-            var depFn = required[dependencies[i]];
-            if (true === depFn) {
-                ifn();
-            } else {
-                required[dependencies[i]] = depFn ? (function(origFn) {
-                    return function() { origFn(); ifn(); };
-                }(depFn)) : ifn;
-            }
+            required[dependencies[i]] = depFn ? (function(origFn) {
+                return function() { origFn(); ifn(); };
+            }(depFn)) : ifn;
         }
     }
+}
 
-    function satisfy(dep) {
-        if (required[dep] && true !== required[dep]) { required[dep](); }
-        required[dep] = true;
-    }
-}(this));
+function satisfy(dep) {
+    if (required[dep] && true !== required[dep]) { required[dep](); }
+    required[dep] = true;
+}
