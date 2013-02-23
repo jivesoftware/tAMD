@@ -62,7 +62,7 @@ function requireSync(id, contextId, skipHook) {
     return ret;
 }
 
-function stubHook(fn) { fn.apply(undef, [].slice.call(arguments, 1)); }
+function stubHook(next) { next.apply(undef, [].slice.call(arguments, 1)); }
 
 var tAMD = {
     _pre: stubHook,

@@ -27,18 +27,18 @@
 define('tAMD/debug', ['tAMD/hooks', 'require'], function(hooks, requireSync) {
     var alreadyChecked = {};
 
-    hooks['on']('define', function(id, dependencies, factory, fn) {
+    hooks['on']('define', function(id, dependencies, factory, next) {
         warnIfValueMissing(id, factory);
         errorIfRelative(id);
         for (var i = 0; i < dependencies.length; i++) {
             warnIfMissing(dependencies[i]);
         }
-        fn(id, dependencies, factory);
+        next(id, dependencies, factory);
     });
 
-    hooks['on']('publish', function(id, moduleValue, fn) {
+    hooks['on']('publish', function(id, moduleValue, next) {
         warnIfDuplicate(id);
-        fn(id, moduleValue);
+        next(id, moduleValue);
     });
 
     function warnIfDuplicate(id) {

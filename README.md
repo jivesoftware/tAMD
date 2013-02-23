@@ -142,34 +142,34 @@ dependency loading.
 
 There are three lifecycle events that you can register callbacks for:
 
-* define : `hooks.on('define', [moduleName], function(id, dependencies, factory, fn){})`
-* publish : `hooks.on('publish', [moduleName], function(id, moduleValue, fn){})`
-* require : `hooks.on('require', [moduleName], function(id, contextId, fn){})`
+* define : `hooks.on('define', [moduleName], function(id, dependencies, factory, next){})`
+* publish : `hooks.on('publish', [moduleName], function(id, moduleValue, next){})`
+* require : `hooks.on('require', [moduleName], function(id, contextId, next){})`
 
 Use the "define" hook to run a callback as soon as a module is declared
 via a call to `define()` before its dependencies are resolved or its
 factory is invoked:
 
     require(['tAMD/hooks'], function(hooks) {
-        hooks.on('define', 'someOldModule', function(id, dependencies, factory, fn) {
+        hooks.on('define', 'someOldModule', function(id, dependencies, factory, next) {
             revisedDeps = dependencies.map(function(dep) {
                 return dep === 'jquery' ? 'jquery-1.4' : dep;
             });
-            fn(id, revisedDependencies, factory);
+            next(id, revisedDependencies, factory);
         });
     });
 
 The above example intercepts the definition of a module called
 "someOldModule" and replaces its dependency on jQuery with an older
-jQuery version.  By modifying the arguments given to `fn` you could also
-change the name of the module or replace or wrap its factory.
+jQuery version.  By modifying the arguments given to `next` you could
+also change the name of the module or replace or wrap its factory.
 
 The last argument to a callback will always be a function that is called
 to signal that the callback is complete.  In this way lifecycle
 callbacks can operate asynchronously.  If that function is never called
 then the define, publish, or require operation will never complete.
 
-In a "define" hook, if you choose not to invoke `fn` the module
+In a "define" hook, if you choose not to invoke `next` the module
 definition will effectively be cancelled.  In that case the module's
 dependencies are not resolved and its factory is never invoked.
 
@@ -177,12 +177,12 @@ The "publish" hook is similar; except that its callbacks are invoked
 after the module's factory is executed.  In a "publish" hook you can
 change the name of a module, tweak or replace the value that the module
 exports, prevent the module from becoming available as a dependency to
-other modules by not invoking `fn`.  For example:
+other modules by not invoking `next`.  For example:
 
     require(['tAMD/hooks'], function(hooks) {
-        hooks.on('publish', 'jquery', function(id, moduleValue, fn) {
+        hooks.on('publish', 'jquery', function(id, moduleValue, next) {
             var version = moduleValue.fn.jquery;  // moduleValue === jQuery in this case
-            fn('jquery-'+ version, moduleValue);
+            next('jquery-'+ version, moduleValue);
         });
     });
 
@@ -202,7 +202,7 @@ a `define()` call with no module name then the second argument will be
 a "require" hook to normalize relative module paths:
 
     require(['tAMD/hooks'], function(hooks) {
-        hooks.on('require', function(id, contextId, fn) {
+        hooks.on('require', function(id, contextId, next) {
             var contextParts = contextId ? contextId.split('/') : [];
             var idParts = id.split('/');
             var dir, module, normalized;
@@ -215,7 +215,7 @@ a "require" hook to normalize relative module paths:
                 normalized = idParts;
             }
 
-            fn(normalized.join('/'), contextId);
+            next(normalized.join('/'), contextId);
         });
     });
 
@@ -239,7 +239,7 @@ all three hook types if you exclude the module name argument then the
 hook will act on *all* modules.
 
 As with "define" and "publish", you can cancel "require" events by not
-invoking `fn`.  If a "require" event is triggered by a dependency list
+invoking `next`.  If a "require" event is triggered by a dependency list
 in a `define()` call then the corresponding "define" event will also be
 cancelled.
 
