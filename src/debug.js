@@ -34,7 +34,7 @@ define('tAMD/debug', ['tAMD/hooks', 'require'], function(hooks, requireSync) {
     });
 
     hooks['on']('publish', function(id, moduleValue, next) {
-        warnIfDuplicate(id);
+        warnIfDuplicate(id, moduleValue);
         next(id, moduleValue);
     });
 
@@ -43,8 +43,8 @@ define('tAMD/debug', ['tAMD/hooks', 'require'], function(hooks, requireSync) {
         next(id, contextId);
     });
 
-    function warnIfDuplicate(id) {
-        if (requireSync(id)) {
+    function warnIfDuplicate(id, moduleValue) {
+        if (moduleValue && requireSync(id)) {
             warn('Module is already defined.', dispName(id));
         }
     }

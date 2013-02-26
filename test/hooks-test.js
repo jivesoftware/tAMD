@@ -221,9 +221,11 @@ test('gets context in which module is required', 1, function() {
     });
 });
 
-test('gets context in which module is required on sync require', function() {
+test('gets context in which module is required on sync require', 1, function() {
     this.onRequire('foo', function(id, contextId, next) {
-        equal(contextId, 'myModule', 'we can see that `foo` is required by `myModule`');
+        if (contextId === 'myModule') {
+            ok(true, 'we can see that `foo` is required by `myModule`');
+        }
         next(id, contextId);
     });
 
@@ -296,7 +298,9 @@ test('removes a callback that runs on all module ids for a given event type', 1,
     }
 
     function bCallback(id, dependencies, factory, next) {
-        ok(true, 'the second "define" callback should be called');
+        if (id === 'nao') {
+            ok(true, 'the second "define" callback should be called');
+        }
         next(id, dependencies, factory);
     }
 

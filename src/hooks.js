@@ -45,11 +45,16 @@ define('tAMD/hooks', ['tAMD'], function(tAMD, undef) {
     };
 
     tAMD._post = function(callback, id, moduleValue) {
-        return runCallbacks('publish', [id, moduleValue], callback);
+        if (id) {
+            runCallbacks('publish', [id, moduleValue], callback);
+        }
+        else {
+            callback(id, moduleValue);
+        }
     };
 
     tAMD._req = function(callback, id, contextId) {
-        return runCallbacks('require', [id, contextId], callback);
+        runCallbacks('require', [id, contextId], callback);
     };
 
     function runCallbacks(eventType, args, callback) {
