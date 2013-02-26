@@ -112,16 +112,16 @@ asyncTest('supports asynchronous plugin lookup', 1, function() {
 test('supports plugin chains', 4, function() {
     var that = this;
 
-    define('a/test', ['foo!./bar!../b/nao!./obj'], function(res) {
+    define('a/test', ['foo!bar!nao!obj'], function(res) {
         strictEqual(res, that.obj, 'loaded resource through three plugins');
         strictEqual(res.foo, true, 'resource gets a "foo" attribute');
         strictEqual(res.bar, true, 'resource gets a "bar" attribute');
         strictEqual(res.nao, true, 'resource gets a "nao" attribute');
     });
 
-    define('foo',   { load: loader('foo') });
-    define('a/bar', { load: loader('bar') });
-    define('b/nao', { load: loader('nao') });
+    define('foo', { load: loader('foo') });
+    define('bar', { load: loader('bar') });
+    define('nao', { load: loader('nao') });
 
     function loader(label) {
         return function(resourceId, require, load) {
@@ -132,3 +132,29 @@ test('supports plugin chains', 4, function() {
         };
     }
 });
+
+// TODO: Is this how chained plugins with relative ids should be
+// handled?
+//test('supports plugin chains with relative plugin ids', 4, function() {
+//    var that = this;
+//
+//    define('a/test', ['foo!./bar!../b/nao!./obj'], function(res) {
+//        strictEqual(res, that.obj, 'loaded resource through three plugins');
+//        strictEqual(res.foo, true, 'resource gets a "foo" attribute');
+//        strictEqual(res.bar, true, 'resource gets a "bar" attribute');
+//        strictEqual(res.nao, true, 'resource gets a "nao" attribute');
+//    });
+//
+//    define('foo',   { load: loader('foo') });
+//    define('a/bar', { load: loader('bar') });
+//    define('b/nao', { load: loader('nao') });
+//
+//    function loader(label) {
+//        return function(resourceId, require, load) {
+//            require([resourceId], function(res) {
+//                res[label] = true;
+//                load(res);
+//            });
+//        };
+//    }
+//});

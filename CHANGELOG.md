@@ -5,7 +5,11 @@
   argument that must be called when the hook is finished.
 * Callbacks run earlier on async 'require' events, which allows async
   side-effects in those callbacks.
-* Adds 'plugins'
+* Adds support for the [Loader Plugins][] spec via the 'plugins' extension
+* 'publish' lifecycle hook now only runs if module id is truthy - i.e.,
+  it is not `undefined`
+
+[Loader Plugins]: https://github.com/amdjs/amdjs-api/wiki/Loader-Plugins
 
 ## Version 0.1.0
 

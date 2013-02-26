@@ -33,18 +33,13 @@ define('tAMD/plugins', ['tAMD/hooks', 'tAMD/normalize'], function(hooks, normali
       , exp = /^(.*?)!(.*)/;
 
     hooks['on']('require', function(id, contextId, next) {
-        //// TODO: is this shorter?
-        //var parts    = id ? id.split('!') : []
-        //  , plugin   = parts.shift()
-        //  , resource = parts.join('!');
-
         var matches = exp.exec(id), plugin, resource;
 
         if (!matches) {
             next(id, contextId);
         }
         else {
-            plugin   = normalize(matches[1], contextId);  // TODO: this normalize call is redundant
+            plugin   = normalize(matches[1], contextId);
             resource = matches[2];
 
             require([plugin], function(p) {
