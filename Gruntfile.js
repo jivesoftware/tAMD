@@ -28,6 +28,7 @@ module.exports = function(grunt) {
           'src/normalize.js',
           'src/plugins.js',
           'src/loader.js',
+          'src/jquery.js',
           'src/debug.js'
         ],
         dest: 'dist/<%= pkg.name %>.cc.js'
@@ -103,6 +104,7 @@ module.exports = function(grunt) {
       normalize: ['define', 'hooks'],
       plugins: ['define', 'hooks', 'normalize'],
       loader: ['define', 'hooks'],
+      jquery: ['define', 'hooks'],
       debug: ['define', 'hooks']
     };
     var cs = grunt.option('components'), ds, ret;

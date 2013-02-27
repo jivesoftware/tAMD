@@ -8,6 +8,9 @@
 * Adds support for the [Loader Plugins][] spec via the 'plugins' extension
 * 'publish' lifecycle hook now only runs if module id is truthy - i.e.,
   it is not `undefined`
+* Adds 'jquery' extension for managing multiple versions of jQuery
+* Adds 'jquery-minimal' extension for jQuery compatibility without
+  multiple version management
 
 [Loader Plugins]: https://github.com/amdjs/amdjs-api/wiki/Loader-Plugins
 
