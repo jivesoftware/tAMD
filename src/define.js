@@ -147,6 +147,9 @@ function run(fn, dependencies) {
 }
 
 function satisfy(dep) {
-    if (required[dep] && true !== required[dep]) { required[dep](); }
+    var go = required[dep];
     required[dep] = true;
+    if (go && true !== go) {
+        go();
+    }
 }
