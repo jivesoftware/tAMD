@@ -82,3 +82,14 @@ test('provides dependencies to multiple modules if necessary', 3, function() {
 
     define('d', d);
 });
+
+test('resolves a module that results in additional require of one of its dependencies', 1, function() {
+    var a = {}, b = {};
+    define('b', ['a'], function() {
+        require(['a'], function(myA) {
+            strictEqual(myA, a, 'inner require succeeded');
+        });
+        return b;
+    });
+    define('a', a);
+});
