@@ -79,3 +79,13 @@ asyncTest('loads module immediately if URL mapping is given after module is requ
         });
     }, 0);
 });
+
+test('avoids running callback more than once', 1, function() {
+    require(['tAMD/loader'], function(loader) {
+        loader.map(['fakeDep1', 'fakeDep2'], [], function() {
+            ok(true, 'this assertion should run exactly once');
+        });
+    });
+    require(['fakeDep1'], function() {});
+    require(['fakeDep2'], function() {});
+});
