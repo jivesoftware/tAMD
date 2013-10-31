@@ -22,7 +22,7 @@
  * limitations under the License.
  */
 
-/*global define require console */
+/*global define, require, console */
 
 define('tAMD/debug', ['tAMD/hooks', 'require'], function(hooks, requireSync) {
     var alreadyChecked = {};

@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-/*jshint boss:true loopfunc:true */
+/*jshint boss:true, loopfunc:true */
 
 var global      = this
   , definitions = {}

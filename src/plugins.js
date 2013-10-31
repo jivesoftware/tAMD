@@ -26,7 +26,7 @@
  * limitations under the License.
  */
 
-/*global define require */
+/*global define, require */
 
 define('tAMD/plugins', ['tAMD/hooks', 'tAMD/normalize'], function(hooks, normalize) {
     var started = {}

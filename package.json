@@ -20,20 +20,20 @@
     }
   ],
   "engines": {
-    "node": ">= 0.8.0"
+    "node": ">= 0.10.0"
   },
   "scripts": {
     "test": "grunt test"
   },
   "devDependencies": {
-    "grunt-contrib-jshint": "0.1.1rc6",
-    "grunt-contrib-qunit": "0.1.1rc6",
-    "grunt-contrib-uglify": "0.1.1rc6",
-    "grunt-contrib-watch": "0.2.0rc7",
-    "grunt-contrib-clean": "0.4.0rc6",
-    "grunt-contrib-connect": "~0.1.0",
-    "grunt-closure-tools": "~0.7.3",
     "grunt": "~0.4.1",
-    "underscore": "~1.4.4"
+    "grunt-contrib-jshint": "~0.7.0",
+    "grunt-contrib-qunit": "~0.3.0",
+    "grunt-contrib-uglify": "~0.2.5",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-connect": "~0.5.0",
+    "grunt-closure-tools": "~0.8.3",
+    "underscore": "~1.5.2"
   }
 }
