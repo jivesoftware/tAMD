@@ -8,8 +8,8 @@
  * https://github.com/amdjs/amdjs-api/wiki/Loader-Plugins
  *
  * Note that this implementation does not currently support the
- * 'dynamic' property on plugins or the the `config` argument to the
- * plugin `load()` method.
+ * 'dynamic' property on plugins or the `config` argument to the plugin
+ * `load()` method.
  *
  * Copyright 2012-2013 Jive Software
  *

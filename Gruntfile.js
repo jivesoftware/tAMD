@@ -105,6 +105,7 @@ module.exports = function(grunt) {
       plugins: ['define', 'hooks', 'normalize'],
       loader: ['define', 'hooks'],
       jquery: ['define', 'hooks'],
+      'jquery-minimal': ['define'],
       debug: ['define', 'hooks']
     };
     var cs = grunt.option('components'), ds, ret;
