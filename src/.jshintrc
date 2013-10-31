@@ -12,5 +12,6 @@
     "eqnull": false,
     "laxcomma": true,
     "browser": true,
+    "strict": false,
     "predef": []
 }

@@ -3,7 +3,7 @@
  * Modules/AsynchronousDefinition as described in
  * http://wiki.commonjs.org/wiki/Modules/AsynchronousDefinition
  *
- * This extension automatically resolves dependency module ids with
+ * This extension automatically normalizes dependency module ids with
  * relative paths, and exports a function for producing a canonical
  * module id given a relative path and a context.
  *
@@ -24,21 +24,21 @@
 
 /*global define */
 
-define('tAMD/resolve', ['tAMD/hooks'], function(hooks) {
-    hooks['on']('define', function(id, dependencies, factory) {
-        return [id, map(function(d) { return resolve(d, id); }, dependencies), factory];
+define('tAMD/normalize', ['tAMD/hooks'], function(hooks) {
+    hooks['on']('define', function(id, dependencies, factory, next) {
+        next(id, map(function(d) { return normalize(d, id); }, dependencies), factory);
     });
 
-    hooks['on']('require', function(id, contextId) {
-        return [resolve(id, contextId), contextId];
+    hooks['on']('require', function(id, contextId, next) {
+        next(normalize(id, contextId), contextId);
     });
 
     var relative = /^\.\.?\//;
 
-    function resolve(id, contextId) {
+    function normalize(id, contextId) {
         if (!id) { return id; }
 
-        var parts = id.split('/'), contextParts, resolved = [];
+        var parts = id.split('/'), contextParts, normalized = [];
 
         if (relative.test(id)) {
             contextParts = contextId ? contextId.split('/').slice(0, -1) : [];
@@ -50,17 +50,17 @@ define('tAMD/resolve', ['tAMD/hooks'], function(hooks) {
                 case '.':
                     break;
                 case '..':
-                    if (resolved.length < 1) {
+                    if (normalized.length < 1) {
                         throw "Module id, "+ id +", with context, "+ contextId +", has too many '..' components.";
                     }
-                    resolved.pop();
+                    normalized.pop();
                     break;
                 default:
-                    resolved.push(parts[i]);
+                    normalized.push(parts[i]);
             }
         }
 
-        return resolved.join('/');
+        return normalized.join('/');
     }
 
     function map(f, array) {
@@ -71,5 +71,5 @@ define('tAMD/resolve', ['tAMD/hooks'], function(hooks) {
         return results;
     }
 
-    return resolve;
+    return normalize;
 });

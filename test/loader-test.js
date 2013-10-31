@@ -47,7 +47,7 @@ asyncTest('loads multiple scripts in order', 1, function() {
     });
 });
 
-asyncTest('handles relative module ids if tAMD/resolve is loaded first', 1, function() {
+asyncTest('handles relative module ids if tAMD/normalize is loaded first', 1, function() {
     define('namespace/d', ['../a'], function(a) {
         equal(a.val, 'a', 'loaded module `a` using a relative module id');
         start();
@@ -78,4 +78,14 @@ asyncTest('loads module immediately if URL mapping is given after module is requ
             loader.map(['f'], ['/test/fixture/f.js']);
         });
     }, 0);
+});
+
+test('avoids running callback more than once', 1, function() {
+    require(['tAMD/loader'], function(loader) {
+        loader.map(['fakeDep1', 'fakeDep2'], [], function() {
+            ok(true, 'this assertion should run exactly once');
+        });
+    });
+    require(['fakeDep1'], function() {});
+    require(['fakeDep2'], function() {});
 });

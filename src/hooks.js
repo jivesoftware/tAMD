@@ -22,32 +22,53 @@
  */
 
 /*global define */
+/*jshint expr:true */
 
 define('tAMD/hooks', ['tAMD'], function(tAMD, undef) {
     var queues = {};
 
-    tAMD._pre = function(/* id, dependencies, factory */) {
-        return runCallbacks('define', arguments);
-    };
-
-    tAMD._post = function(/* id, moduleValue */) {
-        return runCallbacks('publish', arguments);
-    };
-
-    tAMD._req = function(/* id, contextId */) {
-        return runCallbacks('require', arguments);
-    };
-
-    function runCallbacks(eventType, args) {
-        var callbacks = getQueue(eventType, '**').concat(getQueue(eventType, args[0]))
-          , ret, val;
-        for (var i = 0; i < callbacks.length; i++) {
-            if (ret !== false) {
-                val = callbacks[i].apply(undef, ret || args);
-                ret = (val !== false) && (val || ret);
+    tAMD._pre = function(callback, id, dependencies, factory) {
+        runCallbacks('define', [id, dependencies, factory], function(id_, deps_, factory_) {
+            var finalDeps = [], count = deps_.length, len = count;
+            for (var i = 0; i < len; i++) {
+                runCallbacks('require', [deps_[i], id_], getDep(i));
             }
+            len || callback(id_, finalDeps, factory_);
+            function getDep(n) {
+                return function(dep) {
+                    finalDeps[n] = dep;
+                    --count || callback(id_, finalDeps, factory_);
+                };
+            }
+        });
+
+    };
+
+    tAMD._post = function(callback, id, moduleValue) {
+        if (id) {
+            runCallbacks('publish', [id, moduleValue], callback);
         }
-        return ret;
+        else {
+            callback(id, moduleValue);
+        }
+    };
+
+    tAMD._req = function(callback, id, contextId) {
+        runCallbacks('require', [id, contextId], callback);
+    };
+
+    function runCallbacks(eventType, args, callback) {
+        var callbacks = getQueue(eventType, '**').concat(getQueue(eventType, args[0]));
+        (function run(as) {
+            if (callbacks.length) {
+                callbacks.shift().apply(undef, as.concat(function() {
+                    run([].slice.call(arguments));
+                }));
+            }
+            else {
+                callback.apply(undef, as);
+            }
+        }(args));
     }
 
     function on(eventType, id, callback) {

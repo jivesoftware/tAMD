@@ -34,7 +34,7 @@
  */
 
 /*global define */
-/*jshint boss:true expr:true */
+/*jshint boss:true, expr:true */
 
 define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
     var mappings = {}
@@ -54,18 +54,20 @@ define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
         }
     }
 
-    hooks['on']('define', function(id, dependencies) {
+    hooks['on']('define', function(id, dependencies, factory, next) {
         for (var i = 0; i < dependencies.length; i++) {
             maybeLoad(dependencies[i]);
         }
+        next(id, dependencies, factory);
     });
 
     function maybeLoad(id) {
-        var urls;
+        var urls, callback;
         if (!require(id) && (urls = mappings[id])) {
-            loadInOrder(urls, callbacks[id]);
             delete mappings[id];
-            delete callbacks[id];
+            callback = callbacks[id];
+            clearValue(callbacks, callback);
+            loadInOrder(urls, callback);
         } else {
             requested[id] = true;
         }
@@ -112,6 +114,14 @@ define('tAMD/loader', ['tAMD/hooks', 'require'], function(hooks, require) {
         };
 
         head.insertBefore(script, firstScript);
+    }
+
+    function clearValue(map, value) {
+        for (var k in map) {
+            if (map.hasOwnProperty(k) && map[k] === value) {
+                delete map[k];
+            }
+        }
     }
 
     function chain(f, g) {

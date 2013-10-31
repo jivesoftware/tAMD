@@ -25,8 +25,10 @@ module.exports = function(grunt) {
         src: getComponents() || [
           'src/define.js',
           'src/hooks.js',
-          'src/resolve.js',
+          'src/normalize.js',
+          'src/plugins.js',
           'src/loader.js',
+          'src/jquery.js',
           'src/debug.js'
         ],
         dest: 'dist/<%= pkg.name %>.cc.js'
@@ -99,8 +101,11 @@ module.exports = function(grunt) {
     var deps = {
       define: [],
       hooks: ['define'],
-      resolve: ['define', 'hooks'],
+      normalize: ['define', 'hooks'],
+      plugins: ['define', 'hooks', 'normalize'],
       loader: ['define', 'hooks'],
+      jquery: ['define', 'hooks'],
+      'jquery-minimal': ['define'],
       debug: ['define', 'hooks']
     };
     var cs = grunt.option('components'), ds, ret;
@@ -114,7 +119,7 @@ module.exports = function(grunt) {
       .uniq()
       .value();
 
-      if (ds.indexOf('resolve') > ds.indexOf('loader') && ds.indexOf('loader') > -1) {
+      if (ds.indexOf('normalize') > ds.indexOf('loader') && ds.indexOf('loader') > -1) {
         ret = ds.filter(function(c) {
           return c !== 'loader';
         }).concat('loader');
