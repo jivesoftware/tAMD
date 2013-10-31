@@ -101,6 +101,7 @@ define('tAMD/hooks', ['tAMD'], function(tAMD, undef) {
 
     return {
         'on': on,
-        'off': off
+        'off': off,
+        'run': runCallbacks
     };
 });
