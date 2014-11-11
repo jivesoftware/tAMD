@@ -2,6 +2,16 @@
 
 var _ = require('underscore');
 
+var defaultBundle = [
+  'src/define.js',
+  'src/hooks.js',
+  'src/normalize.js',
+  'src/plugins.js',
+  'src/loader.js',
+  'src/jquery.js',
+  'src/debug.js'
+];
+
 module.exports = function(grunt) {
 
   // Project configuration.
@@ -22,17 +32,23 @@ module.exports = function(grunt) {
         }
       },
       dist: {
-        src: getComponents() || [
-          'src/define.js',
-          'src/hooks.js',
-          'src/normalize.js',
-          'src/plugins.js',
-          'src/loader.js',
-          'src/jquery.js',
-          'src/debug.js'
-        ],
+        src: getComponents() || defaultBundle,
         dest: 'dist/<%= pkg.name %>.cc.js'
       }
+    },
+    concat: {
+      dist: {
+        options: {
+          stripBanners: {
+            block: true
+          },
+          banner: '<%= banner %>\n'+
+            '(function(){\n',
+          footer: '}());\n'
+      },
+        src: getComponents() || defaultBundle,
+        dest: 'dist/<%= pkg.name %>.js'
+      },
     },
     uglify: {
       options: {
@@ -134,14 +150,8 @@ module.exports = function(grunt) {
     }
   }
 
-  // These plugins provide necessary tasks.
-  grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-qunit');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-contrib-connect');
-  grunt.loadNpmTasks('grunt-closure-tools');
+  // load all grunt tasks matching the `grunt-*` pattern
+  require('load-grunt-tasks')(grunt);
 
   grunt.registerTask('compile', ['closureCompiler', 'uglify']);
   grunt.registerTask('test', ['compile', 'connect', 'qunit']);
