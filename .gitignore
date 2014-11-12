@@ -1,3 +1,4 @@
 /node_modules/
 dist/*.cc.*
+dist/tAMD.js
 .tern-port
