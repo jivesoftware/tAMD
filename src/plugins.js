@@ -33,7 +33,7 @@ define('tAMD/plugins', ['tAMD/hooks', 'tAMD/normalize'], function(hooks, normali
       , exp = /^(.*?)!(.*)/;
 
     hooks['on']('require', function(id, contextId, next) {
-        var matches = exp.exec(id), plugin, resource;
+        var matches = exp.exec(id), config = {}, plugin, resource;
 
         if (!matches) {
             next(id, contextId);
@@ -59,7 +59,7 @@ define('tAMD/plugins', ['tAMD/hooks', 'tAMD/normalize'], function(hooks, normali
                     started[normDep] = true;
                     p.load(normResource, require, function(value) {
                         define(normDep, function() { return value; });
-                    });
+                    }, config);
                 }
 
                 next(normDep, contextId);
