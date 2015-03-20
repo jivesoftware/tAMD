@@ -93,3 +93,30 @@ test('resolves a module that results in additional require of one of its depende
     });
     define('a', a);
 });
+
+test("allow modules to export using 'exports' dependency", 6, function() {
+    define('a', ['exports'], function(exports) {
+        propEqual(exports, {}, "'exports' dependency is empty initially");
+        exports.test = 1;
+    });
+
+    define('b', ['a'], function(myA) {
+        strictEqual(myA.test, 1,"Cleanup: 'test' property found in a module's 'exports'");
+    });
+
+    define('c', ['exports'], function(exports) {
+        propEqual(exports, {}, "'exports' dependency is empty initially");
+        exports.testC = 1;
+    });
+
+    define('d', ['c', 'exports'], function(myC, exports) {
+        strictEqual(myC.testC, 1,"'testC' property found in c module's 'exports'");
+        exports.testThrowAway = 1;
+        return { testD: 1 };
+    });
+
+    require(['d'], function(myD) {
+        strictEqual(myD.testD, 1,"Overwrite exports if factory returns: 'testD' property found in d module's 'exports'");
+        strictEqual(myD.testThrowAway, undefined,"'testThrowAway' property not found in d module's 'exports'");
+    });
+});
