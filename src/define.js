@@ -19,9 +19,10 @@
  */
 
 /*jshint boss:true, loopfunc:true */
+/*global console */
 
 var global      = this
-  , definitions = { 'exports' : {} }
+  , definitions = {}
   , required = {}
   , undef;
 
@@ -30,7 +31,6 @@ function define(/* [id], [dependencies], factory */) {
       , id = typeof args[0] === 'string' ? args.shift() : undef
       , dependencies = args.length > 1 ? args.shift() : []
       , factory = args[0];
-
 
     tAMD._pre(function(id_, dependencies_, factory_) {
         run(function() {
@@ -47,6 +47,10 @@ function requireSync(id, contextId, skipHook) {
         return function(id) {
             return requireSync(id, contextId);
         };
+    }
+
+    if (id === 'exports') {
+        return {};
     }
     
     var ret;
@@ -79,15 +83,19 @@ global['require'] = require;
 
 function addDefinition(id, dependencies, factory, exportsIdx) {
 
+    if (exportsIdx !== -1) {
+        dependencies[exportsIdx] = {};
+    }
+
     var moduleValue = typeof factory === 'function' ?
           factory.apply(undef, dependencies) : factory;
 
-    if (!moduleValue && exportsIdx !== -1) {
+    if (moduleValue === undefined && exportsIdx !== -1) {
         moduleValue = dependencies[exportsIdx];
     }
 
     tAMD._post(function(id_, moduleValue_) {
-        if (id_) {
+        if (id_ && moduleValue_) {
             definitions[id_] = moduleValue_;
             satisfy(id_);
         }
