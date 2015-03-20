@@ -34,7 +34,7 @@ function define(/* [id], [dependencies], factory */) {
 
     tAMD._pre(function(id_, dependencies_, factory_) {
         run(function() {
-            addDefinition(id_, map(function(d) {return requireSync(d, id_, 1);}, dependencies_), factory_, dependencies.indexOf('exports'));
+            addDefinition(id_, map(function(d) { return requireSync(d, id_, 1); }, dependencies_), factory_, dependencies_.indexOf('exports'));
         }, dependencies_);
     }, id, dependencies, factory);
 }
